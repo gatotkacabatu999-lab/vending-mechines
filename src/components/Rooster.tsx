@@ -1564,86 +1564,98 @@ export function Rooster({ viewMode: viewModeProp = "week" }: { viewMode?: ViewMo
       {/* ── Manage Modal ─────────────────────────────────────────────────────── */}
       <Dialog open={manageOpen} onOpenChange={setManageOpen}>
         <DialogContent className="max-w-md rounded-2xl p-0 overflow-hidden gap-0" onOpenAutoFocus={e => e.preventDefault()}>
-          <DialogHeader className="px-5 pt-5 pb-4">
+
+          {/* Header */}
+          <DialogHeader className="px-5 pt-5 pb-4 border-b border-border bg-muted/30">
             <div className="flex items-center gap-3">
-              <div className="flex shrink-0 items-center justify-center p-2 bg-primary/10 rounded-lg text-primary">
-                <Settings2 className="size-5" />
+              <div className="flex shrink-0 items-center justify-center w-9 h-9 rounded-xl bg-primary text-primary-foreground shadow-sm">
+                <Settings2 className="size-4" />
               </div>
-              <DialogTitle className="text-base font-semibold tracking-tight">Manage</DialogTitle>
+              <div>
+                <DialogTitle className="text-sm font-semibold tracking-tight leading-none mb-0.5">Manage</DialogTitle>
+                <p className="text-[10px] text-muted-foreground">Staff, shifts &amp; route cycles</p>
+              </div>
             </div>
           </DialogHeader>
 
-          {/* Tabs */}
-          <div className="flex border-b border-border px-5">
-            {(["staff", "shift", "route"] as const).map(tab => (
-              <button
-                key={tab}
-                onClick={() => setManageTab(tab)}
-                className={`h-9 px-4 text-xs font-semibold border-b-2 transition-colors ${
-                  manageTab === tab
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {tab === "staff"
-                  ? <span className="flex items-center gap-1.5"><Users className="size-3" />Staff</span>
-                  : tab === "shift"
-                  ? <span className="flex items-center gap-1.5"><Clock className="size-3" />Shift</span>
-                  : <span className="flex items-center gap-1.5"><CalendarDays className="size-3" />Route</span>}
-              </button>
-            ))}
+          {/* Pill Tabs */}
+          <div className="px-5 py-3 bg-muted/30 border-b border-border">
+            <div className="flex bg-background rounded-xl border border-border p-0.5 gap-0.5">
+              {(["staff", "shift", "route"] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setManageTab(tab)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 h-7 rounded-[10px] text-[11px] font-semibold transition-all ${
+                    manageTab === tab
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  }`}
+                >
+                  {tab === "staff" ? <><Users className="size-3" />Staff</>
+                   : tab === "shift" ? <><Clock className="size-3" />Shift</>
+                   : <><CalendarDays className="size-3" />Route</>}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="px-5 py-4 flex flex-col gap-4 overflow-y-auto max-h-[65vh]">
+          {/* Content */}
+          <div className="px-5 py-4 flex flex-col gap-3 overflow-y-auto max-h-[60vh]">
+
             {/* ── Staff Tab ── */}
             {manageTab === "staff" && (
               <>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium">Name</label>
-                  <Input placeholder="e.g. Ahmad Faris" value={resForm.name} onChange={e => setResForm(p => ({ ...p, name: e.target.value }))} />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium">Role</label>
-                  <Input placeholder="e.g. Driver, Operator" value={resForm.role} onChange={e => setResForm(p => ({ ...p, role: e.target.value }))} />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium">Off Day</label>
-                  <select
-                    value={resForm.offDay ?? ""}
-                    onChange={e => setResForm(p => ({ ...p, offDay: e.target.value === "" ? null : Number(e.target.value) }))}
-                    className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                <div className="rounded-xl border border-border bg-card p-4 flex flex-col gap-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">New Staff</p>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Name</label>
+                    <Input placeholder="e.g. Ahmad Faris" value={resForm.name} onChange={e => setResForm(p => ({ ...p, name: e.target.value }))} className="h-9 text-sm" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Role</label>
+                    <Input placeholder="e.g. Driver, Operator" value={resForm.role} onChange={e => setResForm(p => ({ ...p, role: e.target.value }))} className="h-9 text-sm" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Off Day</label>
+                    <select
+                      value={resForm.offDay ?? ""}
+                      onChange={e => setResForm(p => ({ ...p, offDay: e.target.value === "" ? null : Number(e.target.value) }))}
+                      className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="">None</option>
+                      {DAYS_SHORT.map((d, i) => (
+                        <option key={i} value={i}>{d}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="w-full"
+                    onClick={async () => {
+                      if (!resForm.name.trim()) { toast.error("Please enter a name"); return }
+                      const nr: Resource = { id: `r${Date.now()}`, name: resForm.name.trim(), role: resForm.role.trim(), color: RESOURCE_COLORS[resources.length % RESOURCE_COLORS.length], offDay: resForm.offDay ?? null }
+                      const ok = await apiSaveResource(nr)
+                      if (ok) {
+                        setResources(prev => [...prev, nr])
+                        setResForm({ name: "", role: "", color: "", offDay: null })
+                        toast.success("Staff added")
+                      } else toast.error("Failed to save staff")
+                    }}
                   >
-                    <option value="">None</option>
-                    {DAYS_SHORT.map((d, i) => (
-                      <option key={i} value={i}>{d}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex justify-end pt-1">
-                  <Button size="sm" onClick={async () => {
-                    if (!resForm.name.trim()) { toast.error("Please enter a name"); return }
-                    const nr: Resource = { id: `r${Date.now()}`, name: resForm.name.trim(), role: resForm.role.trim(), color: RESOURCE_COLORS[resources.length % RESOURCE_COLORS.length], offDay: resForm.offDay ?? null }
-                    const ok = await apiSaveResource(nr)
-                    if (ok) {
-                      setResources(prev => [...prev, nr])
-                      setResForm({ name: "", role: "", color: "", offDay: null })
-                      toast.success("Staff added")
-                    } else toast.error("Failed to save staff")
-                  }}><Plus className="size-3.5 mr-1" />Add Staff</Button>
+                    <Plus className="size-3.5 mr-1.5" />Add Staff
+                  </Button>
                 </div>
 
-                {/* Show Shift Count Checkbox */}
-                <Separator className="my-2" />
-                <div className="flex items-center gap-2">
+                <div className="rounded-xl border border-border bg-card px-4 py-3 flex items-center gap-3">
                   <input
                     type="checkbox"
                     id="showStaffShiftCount"
                     checked={showStaffShiftCount}
                     onChange={e => setShowStaffShiftCount(e.target.checked)}
-                    className="h-4 w-4 rounded border border-input cursor-pointer"
+                    className="h-4 w-4 rounded border border-input cursor-pointer accent-primary"
                   />
-                  <label htmlFor="showStaffShiftCount" className="text-sm font-medium text-foreground cursor-pointer">
-                    Show Shift Count in Table
+                  <label htmlFor="showStaffShiftCount" className="text-[11px] font-medium text-foreground cursor-pointer leading-tight">
+                    Show shift count in table
                   </label>
                 </div>
               </>
@@ -1652,250 +1664,221 @@ export function Rooster({ viewMode: viewModeProp = "week" }: { viewMode?: ViewMo
             {/* ── Shift Tab ── */}
             {manageTab === "shift" && (
               <>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium">Type</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(["route", "off"] as ShiftTypeId[]).map(tid => (
-                      <button
-                        key={tid}
-                        type="button"
-                        onClick={() => {
-                          setShiftType(tid)
-                          if (tid === "off") {
-                            const offDefault = OFF_SUB_TYPES.find(t => t.id === "off")!
-                            setOffSubType("off")
-                            setManageTimeEnabled(false)
-                            setShiftForm(p => ({ ...p, title: offDefault.label, color: offDefault.color }))
-                          } else {
-                            setShiftForm(p => ({ ...p, title: "", color: "#3B82F6" }))
-                          }
-                        }}
-                        className={`py-1 rounded-lg text-[11px] font-semibold border transition-all ${
-                          shiftType === tid
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "border-border bg-background text-muted-foreground hover:text-foreground hover:border-primary/40"
-                        }`}
-                      >
-                        {tid === "route" ? "Route" : "Off"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {shiftType === "route" && (
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium">Route</label>
-                    <select
-                      value={shiftForm.title}
-                      onChange={e => {
-                        const selected = routes.find(r => r.name === e.target.value)
-                        const preset = getShiftPreset(selected?.shift ?? "")
-                        const effectiveColor = selected ? (routeEffectiveColorMap.get(selected.name) ?? "#3B82F6") : shiftForm.color
-                        setShiftForm(p => ({ ...p, title: e.target.value, color: effectiveColor, ...preset }))
-                      }}
-                      className="h-9 w-full rounded-md border border-input bg-background px-3 text-[11px] md:text-[11px] focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                        <option value="">-- Select Route --</option>
-                      {routes.map(r => (
-                        <option key={r.id} value={r.name}>{r.name}{r.code ? ` (${r.code})` : ""} — {r.shift}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {shiftType === "off" && (
-                  <div className="flex flex-col gap-1.5">
-                      <label className="text-sm font-medium">Subtype</label>
-                    <select
-                      value={offSubType}
-                      onChange={e => {
-                        const selected = OFF_SUB_TYPES.find(st => st.id === e.target.value)
-                        if (!selected) return
-                        setOffSubType(selected.id as OffSubTypeId)
-                        setShiftForm(p => ({ ...p, title: selected.label, color: selected.color }))
-                      }}
-                      className="h-9 w-full rounded-md border border-input bg-background px-3 text-[11px] md:text-[11px] focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      {OFF_SUB_TYPES.map(st => (
-                        <option key={st.id} value={st.id}>{st.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium">Staff</label>
-                  <select value={shiftForm.resourceId} onChange={e => setShiftForm(p => ({ ...p, resourceId: e.target.value }))} className="h-9 w-full rounded-md border border-input bg-background px-3 text-[11px] md:text-[11px] focus:outline-none focus:ring-2 focus:ring-ring">
-                    {resources.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-                  </select>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium">Start Date</label>
-                  <div className="relative w-fit">
-                    <input
-                      type="date"
-                      value={shiftForm.date}
-                      onChange={e => {
-                        const nextStart = e.target.value
-                        setShiftForm(p => ({ ...p, date: nextStart }))
-                        const durationNum = Number(shiftDurationDays)
-                        if (Number.isFinite(durationNum) && durationNum > 0) {
-                          setShiftEndDate(addDaysToDateKey(nextStart, Math.floor(durationNum) - 1))
-                        } else if (shiftEndDate < nextStart) {
-                          setShiftEndDate(nextStart)
+                {/* Type selector */}
+                <div className="flex bg-muted rounded-xl border border-border p-0.5 gap-0.5">
+                  {(["route", "off"] as ShiftTypeId[]).map(tid => (
+                    <button
+                      key={tid}
+                      type="button"
+                      onClick={() => {
+                        setShiftType(tid)
+                        if (tid === "off") {
+                          const offDefault = OFF_SUB_TYPES.find(t => t.id === "off")!
+                          setOffSubType("off")
+                          setManageTimeEnabled(false)
+                          setShiftForm(p => ({ ...p, title: offDefault.label, color: offDefault.color }))
+                        } else {
+                          setShiftForm(p => ({ ...p, title: "", color: "#3B82F6" }))
                         }
                       }}
-                      className="h-9 rounded-md border border-input bg-background pl-3 pr-3 text-[11px] md:text-[11px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark]"
-                    />
-                  </div>
+                      className={`flex-1 h-7 rounded-[10px] text-[11px] font-semibold transition-all ${
+                        shiftType === tid
+                          ? "bg-background text-foreground shadow-sm border border-border"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {tid === "route" ? "🗺 Route" : "☕ Off"}
+                    </button>
+                  ))}
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium">End Date</label>
-                  <div className="flex border border-border rounded-md overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={() => setEndDateMode("date")}
-                      className={`flex-1 h-7 text-[10px] font-medium transition-colors ${
-                        endDateMode === "date"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted/50 text-muted-foreground hover:bg-muted"
-                      }`}
-                    >
-                      Pick Date
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEndDateMode("duration")}
-                      className={`flex-1 h-7 text-[10px] font-medium transition-colors ${
-                        endDateMode === "duration"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted/50 text-muted-foreground hover:bg-muted"
-                      }`}
-                    >
-                      Set Duration
-                    </button>
-                  </div>
-                  {endDateMode === "date" ? (
-                    <input
-                      type="date"
-                      value={shiftEndDate}
-                      min={shiftForm.date}
-                      onChange={e => {
-                        const nextEnd = e.target.value
-                        setShiftEndDate(nextEnd)
-                        setShiftDurationDays(String(getInclusiveDurationDays(shiftForm.date, nextEnd)))
-                      }}
-                      className="h-9 rounded-md border border-input bg-background px-3 text-[11px] md:text-[11px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark]"
-                    />
-                  ) : (
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium">End Date</label>
-                        <input
-                          type="date"
-                          value={shiftEndDate}
-                          readOnly
-                          className="h-9 rounded-md border border-input bg-muted/50 px-3 text-[11px] md:text-[11px] cursor-not-allowed [color-scheme:light] dark:[color-scheme:dark]"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium">Duration (days)</label>
-                        <input
-                          type="number"
-                          min={1}
-                          step={1}
-                          value={shiftDurationDays}
-                          onChange={e => {
-                            const next = e.target.value
-                            setShiftDurationDays(next)
-                            const durationNum = Number(next)
-                            if (Number.isFinite(durationNum) && durationNum > 0) {
-                              setShiftEndDate(addDaysToDateKey(shiftForm.date, Math.floor(durationNum) - 1))
-                            }
-                          }}
-                          className="h-9 rounded-md border border-input bg-background px-3 text-[11px] md:text-[11px] focus:outline-none focus:ring-2 focus:ring-ring"
-                          placeholder="e.g. 5"
-                        />
-                      </div>
+
+                <div className="rounded-xl border border-border bg-card p-4 flex flex-col gap-3">
+
+                  {shiftType === "route" && (
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Route</label>
+                      <select
+                        value={shiftForm.title}
+                        onChange={e => {
+                          const selected = routes.find(r => r.name === e.target.value)
+                          const preset = getShiftPreset(selected?.shift ?? "")
+                          const effectiveColor = selected ? (routeEffectiveColorMap.get(selected.name) ?? "#3B82F6") : shiftForm.color
+                          setShiftForm(p => ({ ...p, title: e.target.value, color: effectiveColor, ...preset }))
+                        }}
+                        className="h-9 w-full rounded-lg border border-input bg-background px-3 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring"
+                      >
+                        <option value="">— Select Route —</option>
+                        {routes.map(r => (
+                          <option key={r.id} value={r.name}>{r.name}{r.code ? ` (${r.code})` : ""} — {r.shift}</option>
+                        ))}
+                      </select>
                     </div>
                   )}
-                </div>
-                {shiftType === "route" && (
-                  <div className="flex items-center justify-end">
+
+                  {shiftType === "off" && (
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Subtype</label>
+                      <select
+                        value={offSubType}
+                        onChange={e => {
+                          const selected = OFF_SUB_TYPES.find(st => st.id === e.target.value)
+                          if (!selected) return
+                          setOffSubType(selected.id as OffSubTypeId)
+                          setShiftForm(p => ({ ...p, title: selected.label, color: selected.color }))
+                        }}
+                        className="h-9 w-full rounded-lg border border-input bg-background px-3 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring"
+                      >
+                        {OFF_SUB_TYPES.map(st => (
+                          <option key={st.id} value={st.id}>{st.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Staff</label>
+                    <select value={shiftForm.resourceId} onChange={e => setShiftForm(p => ({ ...p, resourceId: e.target.value }))} className="h-9 w-full rounded-lg border border-input bg-background px-3 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring">
+                      {resources.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Start Date</label>
+                      <input
+                        type="date"
+                        value={shiftForm.date}
+                        onChange={e => {
+                          const nextStart = e.target.value
+                          setShiftForm(p => ({ ...p, date: nextStart }))
+                          const durationNum = Number(shiftDurationDays)
+                          if (Number.isFinite(durationNum) && durationNum > 0) {
+                            setShiftEndDate(addDaysToDateKey(nextStart, Math.floor(durationNum) - 1))
+                          } else if (shiftEndDate < nextStart) {
+                            setShiftEndDate(nextStart)
+                          }
+                        }}
+                        className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark]"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">End Date</label>
+                      <input
+                        type="date"
+                        value={shiftEndDate}
+                        min={shiftForm.date}
+                        onChange={e => {
+                          const nextEnd = e.target.value
+                          setShiftEndDate(nextEnd)
+                          setShiftDurationDays(String(getInclusiveDurationDays(shiftForm.date, nextEnd)))
+                        }}
+                        className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Duration (days)</label>
+                    <input
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={shiftDurationDays}
+                      onChange={e => {
+                        const next = e.target.value
+                        setShiftDurationDays(next)
+                        const durationNum = Number(next)
+                        if (Number.isFinite(durationNum) && durationNum > 0) {
+                          setShiftEndDate(addDaysToDateKey(shiftForm.date, Math.floor(durationNum) - 1))
+                        }
+                      }}
+                      className="h-9 rounded-lg border border-input bg-background px-3 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring w-full"
+                      placeholder="e.g. 5"
+                    />
+                  </div>
+
+                  {shiftType === "route" && (
                     <button
                       type="button"
                       onClick={() => setManageTimeEnabled(prev => !prev)}
-                      className={`inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-[11px] font-medium transition-colors ${
+                      className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-medium transition-all self-start ${
                         manageTimeEnabled
                           ? "border-primary/50 bg-primary/10 text-primary"
-                          : "border-border bg-background text-muted-foreground hover:text-foreground"
+                          : "border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted"
                       }`}
                     >
-                      <Clock className="size-3.5" />
-                      {manageTimeEnabled ? "Hide Time" : "Set Time (Optional)"}
+                      <Clock className="size-3" />
+                      {manageTimeEnabled ? "Hide time" : "Set time (optional)"}
                     </button>
-                  </div>
-                )}
-                {shiftType === "route" && manageTimeEnabled && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-sm font-medium">Start</label>
-                      <select value={shiftForm.startHour} onChange={e => setShiftForm(p => ({ ...p, startHour: Number(e.target.value) }))} className="h-9 w-full rounded-md border border-input bg-background px-3 text-[11px] md:text-[11px] focus:outline-none focus:ring-2 focus:ring-ring">
-                        {HOUR_OPTIONS.slice(0, 48).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                      </select>
+                  )}
+
+                  {shiftType === "route" && manageTimeEnabled && (
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Start</label>
+                        <select value={shiftForm.startHour} onChange={e => setShiftForm(p => ({ ...p, startHour: Number(e.target.value) }))} className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring">
+                          {HOUR_OPTIONS.slice(0, 48).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                        </select>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">End</label>
+                        <select value={shiftForm.endHour} onChange={e => setShiftForm(p => ({ ...p, endHour: Number(e.target.value) }))} className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring">
+                          {HOUR_OPTIONS.slice(1).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                        </select>
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-sm font-medium">End</label>
-                      <select value={shiftForm.endHour} onChange={e => setShiftForm(p => ({ ...p, endHour: Number(e.target.value) }))} className="h-9 w-full rounded-md border border-input bg-background px-3 text-[11px] md:text-[11px] focus:outline-none focus:ring-2 focus:ring-ring">
-                        {HOUR_OPTIONS.slice(1).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                )}
-                <div className="flex justify-end pt-1">
+                  )}
+
                   {isManageShiftReady && (
-                    <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={async () => {
-                      if (!shiftForm.resourceId) { toast.error("Please select staff"); return }
-                      if (!shiftForm.date) { toast.error("Please pick a date"); return }
-                      const finalTitle = shiftType === "off"
-                        ? (OFF_SUB_TYPES.find(t => t.id === offSubType)?.label ?? "Off")
-                        : shiftForm.title.trim()
-                      const finalColor = shiftType === "off"
-                        ? (OFF_SUB_TYPES.find(t => t.id === offSubType)?.color ?? "#6B7280")
-                        : shiftForm.color
-                      if (shiftType === "route" && !finalTitle) { toast.error("Please select a route"); return }
-                      if (shiftType === "route" && manageTimeEnabled && shiftForm.endHour <= shiftForm.startHour) { toast.error("End time must be after start time"); return }
-                      const durationNum = Number(shiftDurationDays)
-                      const resolvedEndDate = Number.isFinite(durationNum) && durationNum > 0
-                        ? addDaysToDateKey(shiftForm.date, Math.floor(durationNum) - 1)
-                        : shiftEndDate
-                      const dateKeys = getDateKeysInRange(shiftForm.date, resolvedEndDate)
-                      const blockedDate = dateKeys.find(dateKey =>
-                        shifts.filter(s => s.resourceId === shiftForm.resourceId && s.date === dateKey).length >= 1
-                      )
-                      if (blockedDate) { toast.error(`Maximum 1 shift per day (${blockedDate})`); return }
+                    <Button
+                      size="sm"
+                      className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
+                      onClick={async () => {
+                        if (!shiftForm.resourceId) { toast.error("Please select staff"); return }
+                        if (!shiftForm.date) { toast.error("Please pick a date"); return }
+                        const finalTitle = shiftType === "off"
+                          ? (OFF_SUB_TYPES.find(t => t.id === offSubType)?.label ?? "Off")
+                          : shiftForm.title.trim()
+                        const finalColor = shiftType === "off"
+                          ? (OFF_SUB_TYPES.find(t => t.id === offSubType)?.color ?? "#6B7280")
+                          : shiftForm.color
+                        if (shiftType === "route" && !finalTitle) { toast.error("Please select a route"); return }
+                        if (shiftType === "route" && manageTimeEnabled && shiftForm.endHour <= shiftForm.startHour) { toast.error("End time must be after start time"); return }
+                        const durationNum = Number(shiftDurationDays)
+                        const resolvedEndDate = Number.isFinite(durationNum) && durationNum > 0
+                          ? addDaysToDateKey(shiftForm.date, Math.floor(durationNum) - 1)
+                          : shiftEndDate
+                        const dateKeys = getDateKeysInRange(shiftForm.date, resolvedEndDate)
+                        const blockedDate = dateKeys.find(dateKey =>
+                          shifts.filter(s => s.resourceId === shiftForm.resourceId && s.date === dateKey).length >= 1
+                        )
+                        if (blockedDate) { toast.error(`Maximum 1 shift per day (${blockedDate})`); return }
 
-                      const batchId = Date.now()
-                      const timeEnabled = shiftType === "route" && manageTimeEnabled
-                      const newShifts: Shift[] = dateKeys.map((dateKey, idx) => ({
-                        id: `s${batchId}_${idx}`,
-                        ...shiftForm,
-                        date: dateKey,
-                        title: finalTitle,
-                        color: finalColor,
-                        startHour: timeEnabled ? shiftForm.startHour : -1,
-                        endHour:   timeEnabled ? shiftForm.endHour   : -1,
-                        hasTime: timeEnabled,
-                      }))
+                        const batchId = Date.now()
+                        const timeEnabled = shiftType === "route" && manageTimeEnabled
+                        const newShifts: Shift[] = dateKeys.map((dateKey, idx) => ({
+                          id: `s${batchId}_${idx}`,
+                          ...shiftForm,
+                          date: dateKey,
+                          title: finalTitle,
+                          color: finalColor,
+                          startHour: timeEnabled ? shiftForm.startHour : -1,
+                          endHour:   timeEnabled ? shiftForm.endHour   : -1,
+                          hasTime: timeEnabled,
+                        }))
 
-                      const results = await Promise.all(newShifts.map(s => apiSaveShift(s)))
-                      if (results.every(Boolean)) {
-                        setShifts(prev => [...prev, ...newShifts])
-                        if (shiftType === "route") {
-                          setShiftForm(p => ({ ...p, title: "" }))
-                        }
-                        toast.success(newShifts.length > 1 ? `${newShifts.length} shifts added` : "Shift added")
-                      } else toast.error("Failed to save shift")
-                    }}><Plus className="size-3.5 mr-1" />Add Shift</Button>
+                        const results = await Promise.all(newShifts.map(s => apiSaveShift(s)))
+                        if (results.every(Boolean)) {
+                          setShifts(prev => [...prev, ...newShifts])
+                          if (shiftType === "route") {
+                            setShiftForm(p => ({ ...p, title: "" }))
+                          }
+                          toast.success(newShifts.length > 1 ? `${newShifts.length} shifts added` : "Shift added")
+                        } else toast.error("Failed to save shift")
+                      }}
+                    >
+                      <Plus className="size-3.5 mr-1.5" />Add Shift
+                    </Button>
                   )}
                 </div>
               </>
@@ -1903,118 +1886,137 @@ export function Rooster({ viewMode: viewModeProp = "week" }: { viewMode?: ViewMo
 
             {/* ── Route Tab ── */}
             {manageTab === "route" && (() => {
-              // Show routes in the ACTUAL routeCycle order so the numbering
-              // displayed here exactly matches what Auto Generate will produce.
               const cycleList = routeCycle
                 .map(id => routes.find(r => r.id === id))
                 .filter((r): r is RouteRef => !!r)
 
               return (
                 <div className="flex flex-col gap-3">
-                  {/* Route list */}
+
+                  {/* Route cycle list */}
                   <div className="flex flex-col gap-1.5">
-                    <p className="text-[11px] text-muted-foreground">
-                      Route cycle order — 6 work days per route, then 1 off day.
-                    </p>
-                    <div className="rounded-xl border border-border divide-y divide-border/40 overflow-y-auto max-h-40">
-                      {cycleList.length === 0 && (
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Route Cycle Order</p>
+                    <div className="rounded-xl border border-border bg-card overflow-hidden">
+                      {cycleList.length === 0 ? (
                         <div className="px-4 py-6 text-center text-[11px] text-muted-foreground italic">
                           No routes. Add routes in Route List first.
                         </div>
+                      ) : (
+                        <div className="divide-y divide-border/50 max-h-44 overflow-y-auto">
+                          {cycleList.map((r, pos) => {
+                            const shift = r.shift?.toUpperCase() ?? ""
+                            const isAm = shift === "AM"
+                            return (
+                              <div key={r.id} className="flex items-center gap-2.5 px-3 py-2.5">
+                                <span className="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-[10px] font-bold text-primary tabular-nums">
+                                  {pos + 1}
+                                </span>
+                                <span className="flex-1 text-[11px] font-medium truncate text-foreground">{r.name}</span>
+                                {shift && (
+                                  <span className={`shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide ${
+                                    isAm ? "bg-blue-500/15 text-blue-600 dark:text-blue-400" : "bg-orange-500/15 text-orange-600 dark:text-orange-400"
+                                  }`}>{shift}</span>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
                       )}
-                      {cycleList.map((r, pos) => {
-                        const shift = r.shift?.toUpperCase() ?? ""
-                        const isAm  = shift === "AM"
-                        return (
-                          <div key={r.id} className="flex items-center gap-2.5 px-3 py-2">
-                            <span className="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-[10px] font-bold text-primary">
-                              {pos + 1}
-                            </span>
-                            <span className="flex-1 text-[11px] font-medium truncate">{r.name}</span>
-                            {shift && (
-                              <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                isAm
-                                  ? "bg-blue-500 text-white dark:bg-blue-600"
-                                  : "bg-orange-500 text-white dark:bg-orange-600"
-                              }`}>{shift}</span>
-                            )}
-                          </div>
-                        )
-                      })}
                     </div>
+                    <p className="text-[10px] text-muted-foreground px-0.5">6 work days per route, then 1 off day.</p>
                   </div>
 
-                  {/* ── Auto Shift Generator ── */}
-                  <div className="rounded-xl border border-border/70 bg-muted/20 p-3 flex flex-col gap-3">
+                  {/* Auto Generate card */}
+                  <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <div className="flex items-center justify-center w-6 h-6 rounded-md bg-primary/10 text-primary shrink-0">
+                      <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/15 text-primary shrink-0">
                         <Zap className="size-3.5" />
                       </div>
-                      <p className="text-[12px] font-semibold text-foreground">Auto Generate Shifts</p>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground -mt-1">
-                      Pattern 6 work + 1 off, cycling through routes above. Skips dates that already have a shift. Select "All Staff" to generate for everyone.
-                    </p>
-
-                    {/* Staff */}
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[11px] font-medium text-foreground">Staff</label>
-                      <select
-                        value={routeStaffId}
-                        onChange={e => setRouteStaffId(e.target.value)}
-                        className="h-8 w-full rounded-md border border-input bg-background px-2.5 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring"
-                      >
-                        <option value="">-- Select Staff --</option>
-                        <option value="all">All Staff</option>
-                        {orderedResources.map(r => (
-                          <option key={r.id} value={r.id}>{r.name}{r.role ? ` (${r.role})` : ""}</option>
-                        ))}
-                      </select>
+                      <div>
+                        <p className="text-[12px] font-semibold text-foreground leading-none">Auto Generate</p>
+                        <p className="text-[9px] text-muted-foreground mt-0.5">6 work + 1 off, skips existing shifts</p>
+                      </div>
                     </div>
 
-                    {/* Starting Route */}
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[11px] font-medium text-foreground">Starting Route</label>
-                      <select
-                        value={startingRoute}
-                        onChange={e => setStartingRoute(e.target.value)}
-                        className="h-8 w-full rounded-md border border-input bg-background px-2.5 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring"
-                      >
-                        <option value="">-- Route List Order --</option>
-                        {routeCycle.map(routeId => {
-                          const route = routes.find(r => r.id === routeId)
-                          return (
-                            <option key={routeId} value={routeId}>
-                              {route?.name || routeId}
-                            </option>
-                          )
-                        })}
-                      </select>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Staff</label>
+                        <select
+                          value={routeStaffId}
+                          onChange={e => setRouteStaffId(e.target.value)}
+                          className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-[10px] focus:outline-none focus:ring-2 focus:ring-ring"
+                        >
+                          <option value="">— Select —</option>
+                          <option value="all">All Staff</option>
+                          {orderedResources.map(r => (
+                            <option key={r.id} value={r.id}>{r.name}{r.role ? ` (${r.role})` : ""}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Start Route</label>
+                        <select
+                          value={startingRoute}
+                          onChange={e => setStartingRoute(e.target.value)}
+                          className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-[10px] focus:outline-none focus:ring-2 focus:ring-ring"
+                        >
+                          <option value="">— Default —</option>
+                          {routeCycle.map(routeId => {
+                            const route = routes.find(r => r.id === routeId)
+                            return (
+                              <option key={routeId} value={routeId}>{route?.name || routeId}</option>
+                            )
+                          })}
+                        </select>
+                      </div>
                     </div>
 
-                    {/* Custom Time Toggle */}
-                    <div className="flex items-center gap-2">
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">From</label>
+                        <input
+                          type="date"
+                          value={genFrom}
+                          onChange={e => {
+                            setGenFrom(e.target.value)
+                            setGenTo(addDaysToDateKey(e.target.value, 27))
+                          }}
+                          className="h-8 rounded-lg border border-input bg-background px-2.5 text-[10px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark] w-full"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">To</label>
+                        <input
+                          type="date"
+                          value={genTo}
+                          min={genFrom}
+                          onChange={e => setGenTo(e.target.value)}
+                          className="h-8 rounded-lg border border-input bg-background px-2.5 text-[10px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark] w-full"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5">
                       <input
                         type="checkbox"
                         id="useCustomTime"
                         checked={useCustomTime}
                         onChange={e => setUseCustomTime(e.target.checked)}
-                        className="h-4 w-4 rounded border border-input cursor-pointer"
+                        className="h-3.5 w-3.5 rounded border border-input cursor-pointer accent-primary"
                       />
-                      <label htmlFor="useCustomTime" className="text-[11px] font-medium text-foreground cursor-pointer">
-                        Set Custom Time
+                      <label htmlFor="useCustomTime" className="text-[10px] font-medium text-foreground cursor-pointer">
+                        Set custom time
                       </label>
                     </div>
 
-                    {/* Custom Time Inputs */}
                     {useCustomTime && (
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-2.5">
                         <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-medium text-foreground">Start Time</label>
+                          <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Start Time</label>
                           <select
                             value={genStartHour}
                             onChange={e => setGenStartHour(parseFloat(e.target.value))}
-                            className="h-8 rounded-md border border-input bg-background px-2.5 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring"
+                            className="h-8 rounded-lg border border-input bg-background px-2.5 text-[10px] focus:outline-none focus:ring-2 focus:ring-ring"
                           >
                             {HOUR_OPTIONS.map(opt => (
                               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -2022,11 +2024,11 @@ export function Rooster({ viewMode: viewModeProp = "week" }: { viewMode?: ViewMo
                           </select>
                         </div>
                         <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-medium text-foreground">End Time</label>
+                          <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">End Time</label>
                           <select
                             value={genEndHour}
                             onChange={e => setGenEndHour(parseFloat(e.target.value))}
-                            className="h-8 rounded-md border border-input bg-background px-2.5 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring"
+                            className="h-8 rounded-lg border border-input bg-background px-2.5 text-[10px] focus:outline-none focus:ring-2 focus:ring-ring"
                           >
                             {HOUR_OPTIONS.map(opt => (
                               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -2035,32 +2037,6 @@ export function Rooster({ viewMode: viewModeProp = "week" }: { viewMode?: ViewMo
                         </div>
                       </div>
                     )}
-
-                    {/* Date range */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[11px] font-medium text-foreground">From</label>
-                        <input
-                          type="date"
-                          value={genFrom}
-                          onChange={e => {
-                            setGenFrom(e.target.value)
-                            setGenTo(addDaysToDateKey(e.target.value, 27))
-                          }}
-                          className="h-8 rounded-md border border-input bg-background px-2.5 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark]"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[11px] font-medium text-foreground">To</label>
-                        <input
-                          type="date"
-                          value={genTo}
-                          min={genFrom}
-                          onChange={e => setGenTo(e.target.value)}
-                          className="h-8 rounded-md border border-input bg-background px-2.5 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark]"
-                        />
-                      </div>
-                    </div>
 
                     <Button
                       size="sm"
