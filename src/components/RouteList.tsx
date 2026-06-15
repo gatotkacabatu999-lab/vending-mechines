@@ -156,6 +156,9 @@ interface ExistingLocationOption {
   latitude: number
   longitude: number
   routeName: string
+  qrCodeImageUrl?: string
+  qrCodeDestinationUrl?: string
+  avatarImageUrl?: string
 }
 
 type EditableField = 'code' | 'name' | 'latitude' | 'longitude'
@@ -1123,7 +1126,10 @@ export function RouteList({ variant = 'route-list' }: RouteListProps) {
       delivery: "Daily",
       latitude: 0,
       longitude: 0,
-      descriptions: []
+      descriptions: [],
+      qrCodeImageUrl: "",
+      qrCodeDestinationUrl: "",
+      avatarImageUrl: "",
     })
     setCodeError("")
   }, [addPointDialogOpen])
@@ -1903,7 +1909,10 @@ export function RouteList({ variant = 'route-list' }: RouteListProps) {
         delivery: "Daily",
         latitude: 0,
         longitude: 0,
-        descriptions: []
+        descriptions: [],
+        qrCodeImageUrl: "",
+        qrCodeDestinationUrl: "",
+        avatarImageUrl: ""
       })
       setCodeError("")
       return
@@ -1915,7 +1924,10 @@ export function RouteList({ variant = 'route-list' }: RouteListProps) {
       delivery: selected.delivery || 'Daily',
       latitude: selected.latitude,
       longitude: selected.longitude,
-      descriptions: []
+      descriptions: [],
+      qrCodeImageUrl: selected.qrCodeImageUrl || "",
+      qrCodeDestinationUrl: selected.qrCodeDestinationUrl || "",
+      avatarImageUrl: selected.avatarImageUrl || ""
     })
 
     const dupMsg = findDuplicateRoute(selected.code, duplicateCheckScope)
