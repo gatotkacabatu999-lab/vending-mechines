@@ -1060,8 +1060,14 @@ export function RouteList({ variant = 'route-list' }: RouteListProps) {
     delivery: "Daily" as string,
     latitude: 0,
     longitude: 0,
-    descriptions: [] as { key: string; value: string }[]
+    descriptions: [] as { key: string; value: string }[],
+    qrCodeImageUrl: "",
+    qrCodeDestinationUrl: "",
+    avatarImageUrl: "",
   })
+  const [addPointOptionalOpen, setAddPointOptionalOpen] = useState(false)
+  const [addPointOptionalTab, setAddPointOptionalTab] = useState<'info' | 'qr' | 'avatar'>('info')
+  const [newPointInfoDraft, setNewPointInfoDraft] = useState({ key: "", value: "" })
   const [selectedExistingLocationCode, setSelectedExistingLocationCode] = useState("")
   const [codeError, setCodeError] = useState<string>("")
   const [actionModalOpen, setActionModalOpen] = useState(false)
@@ -1850,8 +1856,14 @@ export function RouteList({ variant = 'route-list' }: RouteListProps) {
         delivery: "Daily",
         latitude: 0,
         longitude: 0,
-        descriptions: []
+        descriptions: [],
+        qrCodeImageUrl: "",
+        qrCodeDestinationUrl: "",
+        avatarImageUrl: "",
       })
+      setAddPointOptionalOpen(false)
+      setAddPointOptionalTab('info')
+      setNewPointInfoDraft({ key: "", value: "" })
       setCodeError("")
       setAddPointDialogOpen(false)
       toast.success("Location added", {
@@ -2323,7 +2335,6 @@ export function RouteList({ variant = 'route-list' }: RouteListProps) {
   const scale      = Math.min(1, cardW / 340)
   const cardPad    = `${(1.55 * scale).toFixed(2)}rem`
   const cardPadV   = `${(1.25 * scale).toFixed(2)}rem`
-  const cardFontLg = `${(1.01 * scale).toFixed(2)}rem`
   const cardFontSm = `${(0.78 * scale).toFixed(2)}rem`
   const cardFontXs = `${(0.77 * scale).toFixed(2)}rem`
   const rowPadH    = `${(0.9 * scale).toFixed(2)}rem`
@@ -2336,12 +2347,12 @@ export function RouteList({ variant = 'route-list' }: RouteListProps) {
   const btnPad     = `${(0.72 * scale).toFixed(2)}rem`
   const bodyGap    = `${(0.8 * scale).toFixed(2)}rem`
   const kmFs       = `${(0.62 * scale).toFixed(2)}rem`
-  const editTitleFs = cardFontLg
-  const editMetaFs = cardFontXs
-  const editLabelFs = cardFontXs
-  const editInputFs = '11px'
-  const editActionFs = btnFs
-  const editChipFs = badgeFs
+  const editTitleFs = cardFontSm
+  const editMetaFs = badgeFs
+  const editLabelFs = badgeFs
+  const editInputFs = '10px'
+  const editActionFs = cardFontXs
+  const editChipFs = kmFs
   const cardSectionBg = isDark ? 'hsl(var(--background)/0.84)' : 'hsl(var(--background)/0.96)'
   const previewRows = 3
   const hasActiveSearchOrFilter = !!searchQuery.trim() || combinedFilter !== 'all'
@@ -2753,7 +2764,7 @@ export function RouteList({ variant = 'route-list' }: RouteListProps) {
                                     {getDeliveryLabel(type)}&nbsp;<span style={{ opacity: 0.5, fontWeight: 500, color: 'inherit' }}>&bull;</span>&nbsp;<span style={{ color: 'inherit', fontWeight: 700 }}>{pts.length}</span>
                                   </span>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-64 p-0 z-50 backdrop-blur-xl bg-background/90 dark:bg-card/90 shadow-2xl rounded-xl overflow-hidden" style={{ border: `1px solid ${cardBorderColor}` }} align="center" side="top">
+                                <PopoverContent className="w-48 p-0 z-50 backdrop-blur-xl bg-background/90 dark:bg-card/90 shadow-2xl rounded-xl overflow-hidden" style={{ border: `1px solid ${cardBorderColor}` }} align="center" side="top">
                                   {/* Header */}
                                   <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/60" style={{ background: `${markerColor}14` }}>
                                     <span className="size-2.5 rounded-full shrink-0" style={{ background: markerColor }} />
@@ -3876,6 +3887,207 @@ export function RouteList({ variant = 'route-list' }: RouteListProps) {
                                 onChange={(e) => setNewPoint({ ...newPoint, longitude: parseFloat(e.target.value) || 0 })}
                               />
                             </div>
+                          </div>
+
+                          {/* ── Optional Details ── */}
+                          <div className="rounded-xl border border-border/60 overflow-hidden">
+                            <button
+                              type="button"
+                              onClick={() => setAddPointOptionalOpen(p => !p)}
+                              className="w-full flex items-center justify-between px-3 py-2.5 text-left bg-muted/30 hover:bg-muted/50 transition-colors"
+                            >
+                              <span className="text-[11px] font-semibold text-muted-foreground tracking-wide uppercase flex items-center gap-2">
+                                <Info className="size-3.5" />
+                                Optional Details
+                                {(newPoint.descriptions.length > 0 || newPoint.qrCodeImageUrl || newPoint.avatarImageUrl) && (
+                                  <span className="text-[9px] font-bold bg-primary/15 text-primary rounded-full px-1.5 py-0.5 normal-case tracking-normal">
+                                    {[newPoint.descriptions.length > 0 && `${newPoint.descriptions.length} info`, newPoint.qrCodeImageUrl && 'QR', newPoint.avatarImageUrl && 'Avatar'].filter(Boolean).join(' · ')}
+                                  </span>
+                                )}
+                              </span>
+                              <ChevronDown className={cn("size-3.5 text-muted-foreground transition-transform duration-200", addPointOptionalOpen && "rotate-180")} />
+                            </button>
+
+                            {addPointOptionalOpen && (
+                              <div className="px-3 pb-3 pt-2 space-y-3 bg-background/60">
+                                {/* Tabs */}
+                                <div className="flex gap-1 p-0.5 bg-muted/40 rounded-lg">
+                                  {(['info', 'qr', 'avatar'] as const).map(tab => (
+                                    <button
+                                      key={tab}
+                                      type="button"
+                                      onClick={() => setAddPointOptionalTab(tab)}
+                                      className={cn(
+                                        "flex-1 text-[10px] font-semibold py-1 rounded-md transition-all capitalize",
+                                        addPointOptionalTab === tab
+                                          ? "bg-background text-foreground shadow-sm"
+                                          : "text-muted-foreground hover:text-foreground"
+                                      )}
+                                    >
+                                      {tab === 'info' ? 'Info' : tab === 'qr' ? 'QR Code' : 'Avatar'}
+                                    </button>
+                                  ))}
+                                </div>
+
+                                {/* Info tab */}
+                                {addPointOptionalTab === 'info' && (
+                                  <div className="space-y-2">
+                                    {newPoint.descriptions.map((desc, idx) => (
+                                      <div key={idx} className="flex items-center gap-1.5">
+                                        <span className="text-[10px] font-semibold text-foreground bg-muted/60 px-2 py-1 rounded min-w-[60px] truncate">{desc.key}</span>
+                                        <span className="text-[10px] text-muted-foreground flex-1 truncate">{desc.value || '—'}</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => setNewPoint(p => ({ ...p, descriptions: p.descriptions.filter((_, i) => i !== idx) }))}
+                                          className="shrink-0 p-0.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                                        >
+                                          <X className="size-3" />
+                                        </button>
+                                      </div>
+                                    ))}
+                                    <div className="flex gap-1.5 items-end">
+                                      <div className="flex-1 space-y-1">
+                                        <label className="text-[10px] text-muted-foreground font-medium">Key</label>
+                                        <Input
+                                          className="h-7 text-[10px]"
+                                          placeholder="e.g. Contact"
+                                          value={newPointInfoDraft.key}
+                                          onChange={e => setNewPointInfoDraft(p => ({ ...p, key: e.target.value }))}
+                                        />
+                                      </div>
+                                      <div className="flex-1 space-y-1">
+                                        <label className="text-[10px] text-muted-foreground font-medium">Value</label>
+                                        <Input
+                                          className="h-7 text-[10px]"
+                                          placeholder="e.g. 03-1234 5678"
+                                          value={newPointInfoDraft.value}
+                                          onChange={e => setNewPointInfoDraft(p => ({ ...p, value: e.target.value }))}
+                                          onKeyDown={e => {
+                                            if (e.key === 'Enter' && newPointInfoDraft.key.trim()) {
+                                              setNewPoint(p => ({ ...p, descriptions: [...p.descriptions, { key: newPointInfoDraft.key.trim(), value: newPointInfoDraft.value.trim() }] }))
+                                              setNewPointInfoDraft({ key: "", value: "" })
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <button
+                                        type="button"
+                                        disabled={!newPointInfoDraft.key.trim()}
+                                        onClick={() => {
+                                          if (!newPointInfoDraft.key.trim()) return
+                                          setNewPoint(p => ({ ...p, descriptions: [...p.descriptions, { key: newPointInfoDraft.key.trim(), value: newPointInfoDraft.value.trim() }] }))
+                                          setNewPointInfoDraft({ key: "", value: "" })
+                                        }}
+                                        className="self-end h-7 w-7 flex items-center justify-center rounded-md bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+                                      >
+                                        <Plus className="size-3" />
+                                      </button>
+                                    </div>
+                                    {newPoint.descriptions.length === 0 && (
+                                      <p className="text-[10px] text-muted-foreground/60 text-center py-1">No info added yet. Fill in a key + value above.</p>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* QR Code tab */}
+                                {addPointOptionalTab === 'qr' && (
+                                  <div className="space-y-2.5">
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">QR Image</label>
+                                      <div className="flex gap-1.5">
+                                        <Input
+                                          className="h-7 text-[10px] flex-1"
+                                          placeholder="Paste URL or upload →"
+                                          value={newPoint.qrCodeImageUrl?.startsWith('data:') ? '(uploaded image)' : (newPoint.qrCodeImageUrl ?? '')}
+                                          onChange={e => setNewPoint(p => ({ ...p, qrCodeImageUrl: e.target.value }))}
+                                          readOnly={newPoint.qrCodeImageUrl?.startsWith('data:')}
+                                        />
+                                        <label className="h-7 px-2 flex items-center gap-1 rounded-md bg-muted/60 hover:bg-muted border border-border/60 cursor-pointer text-[10px] font-semibold text-muted-foreground shrink-0 transition-colors" title="Upload image">
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={e => {
+                                              const file = e.target.files?.[0]
+                                              if (!file) return
+                                              const reader = new FileReader()
+                                              reader.onload = ev => setNewPoint(p => ({ ...p, qrCodeImageUrl: ev.target?.result as string }))
+                                              reader.readAsDataURL(file)
+                                              e.target.value = ''
+                                            }}
+                                          />
+                                          Upload
+                                        </label>
+                                        {newPoint.qrCodeImageUrl && (
+                                          <button type="button" onClick={() => setNewPoint(p => ({ ...p, qrCodeImageUrl: '' }))} className="h-7 px-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0">
+                                            <X className="size-3" />
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">QR Destination URL</label>
+                                      <Input
+                                        className="h-7 text-[10px]"
+                                        placeholder="https://... (link the QR code points to)"
+                                        value={newPoint.qrCodeDestinationUrl}
+                                        onChange={e => setNewPoint(p => ({ ...p, qrCodeDestinationUrl: e.target.value }))}
+                                      />
+                                    </div>
+                                    {newPoint.qrCodeImageUrl && (
+                                      <div className="flex justify-center pt-1">
+                                        <img src={newPoint.qrCodeImageUrl} alt="QR preview" className="h-16 w-16 object-contain rounded border border-border/60" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* Avatar tab */}
+                                {addPointOptionalTab === 'avatar' && (
+                                  <div className="space-y-2.5">
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Avatar Image</label>
+                                      <div className="flex gap-1.5">
+                                        <Input
+                                          className="h-7 text-[10px] flex-1"
+                                          placeholder="Paste URL or upload →"
+                                          value={newPoint.avatarImageUrl?.startsWith('data:') ? '(uploaded image)' : (newPoint.avatarImageUrl ?? '')}
+                                          onChange={e => setNewPoint(p => ({ ...p, avatarImageUrl: e.target.value }))}
+                                          readOnly={newPoint.avatarImageUrl?.startsWith('data:')}
+                                        />
+                                        <label className="h-7 px-2 flex items-center gap-1 rounded-md bg-muted/60 hover:bg-muted border border-border/60 cursor-pointer text-[10px] font-semibold text-muted-foreground shrink-0 transition-colors" title="Upload image">
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={e => {
+                                              const file = e.target.files?.[0]
+                                              if (!file) return
+                                              const reader = new FileReader()
+                                              reader.onload = ev => setNewPoint(p => ({ ...p, avatarImageUrl: ev.target?.result as string }))
+                                              reader.readAsDataURL(file)
+                                              e.target.value = ''
+                                            }}
+                                          />
+                                          Upload
+                                        </label>
+                                        {newPoint.avatarImageUrl && (
+                                          <button type="button" onClick={() => setNewPoint(p => ({ ...p, avatarImageUrl: '' }))} className="h-7 px-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0">
+                                            <X className="size-3" />
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                    {newPoint.avatarImageUrl && (
+                                      <div className="flex justify-center pt-1">
+                                        <img src={newPoint.avatarImageUrl} alt="Avatar preview" className="h-16 w-16 object-cover rounded-full border border-border/60" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                                      </div>
+                                    )}
+                                    <p className="text-[10px] text-muted-foreground/60">Shown as the location photo in the row info panel.</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </>
                       )}

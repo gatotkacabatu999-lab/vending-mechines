@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Images, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PageHeader } from "@/components/ui/page-header"
 import "lightgallery/css/lightgallery.css"
 import "lightgallery/css/lg-zoom.css"
 import "lightgallery/css/lg-thumbnail.css"
@@ -56,7 +57,6 @@ function ImageGridItem({ point, onImageClick }: { point: LocationImagePoint; onI
 
   return (
     <div className="group cursor-pointer">
-      {/* Image */}
       <div
         className="relative w-full overflow-hidden rounded-xl bg-muted aspect-square mb-3 cursor-zoom-in"
         onClick={() => onImageClick(point, 0)}
@@ -66,18 +66,13 @@ function ImageGridItem({ point, onImageClick }: { point: LocationImagePoint; onI
           alt={point.name}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        {/* Overlay on hover */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
-
-        {/* Photo count badge */}
         {images.length > 1 && (
           <div className="absolute top-2 right-2 flex items-center justify-center w-7 h-7 rounded-full bg-black/60 text-xs font-semibold text-white">
             {images.length}
           </div>
         )}
       </div>
-
-      {/* Info */}
       <div className="space-y-2">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-0.5">
@@ -135,7 +130,6 @@ export function SiteImages() {
     load()
   }, [])
 
-  // Init lightGallery
   useEffect(() => {
     if (!currentGalleryPoint || !galleryHostRef.current) {
       if (lgInstanceRef.current) {
@@ -172,7 +166,6 @@ export function SiteImages() {
         })),
       })
 
-      // Open gallery
       lgInstanceRef.current.openGallery(currentGalleryIndex)
     }
 
@@ -210,69 +203,63 @@ export function SiteImages() {
   const totalPhotos = filteredPoints.reduce((sum, p) => sum + getPointImageUrls(p).length, 0)
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 border rounded-xl overflow-hidden shadow-sm bg-background">
+    <div className="flex flex-col flex-1 min-h-0">
 
-      {/* ── Toolbar ─────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 border-b bg-muted/40 shrink-0">
-        <span className="text-[10px] font-semibold text-muted-foreground tabular-nums shrink-0">
-          {isLoading ? "Loading…" : `${filteredPoints.length} location${filteredPoints.length === 1 ? "" : "s"}`}
-        </span>
-        {!isLoading && totalPhotos > 0 && (
-          <span className="text-[10px] font-semibold text-muted-foreground tabular-nums shrink-0">
-            · {totalPhotos} photo{totalPhotos === 1 ? "" : "s"}
-          </span>
-        )}
+      {/* ── Page heading ────────────────────────────────────────────────── */}
+      <div className="px-4 sm:px-5 lg:px-6 pt-5 sm:pt-6 pb-3 shrink-0">
+        <PageHeader
+          icon={<Images className="size-3.5" />}
+          title="Site Images"
+          description="Click any image to view in full gallery. Filter by route or search by name."
+        />
       </div>
 
-      {/* ── Content ─────────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-5 p-4 md:p-6 overflow-y-auto">
+      {/* ── Toolbar ─────────────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-2 px-4 sm:px-5 lg:px-6 py-3.5 border-b border-border shrink-0 bg-card/80 backdrop-blur-sm">
 
-        {/* Page header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground mb-2">
-              <Images className="size-3.5" />
-              Site Images
-            </div>
-            <p className="text-sm text-muted-foreground max-w-lg leading-relaxed">
-              Click any image to view in full gallery. Filter by route or search by name.
-            </p>
-          </div>
+        <div className="relative flex-1 min-w-[180px] max-w-xs">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search location, code, route…"
+            className="pl-9 h-8 text-xs"
+          />
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative flex-1 min-w-[180px] max-w-xs">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search location, code, route…"
-              className="pl-9 h-9 text-sm"
-            />
-          </div>
+        <div className="rounded-[9px] border border-border bg-background px-2.5 h-8 flex items-center">
+          <select
+            value={selectedRoute}
+            onChange={(e) => setSelectedRoute(e.target.value)}
+            className="bg-transparent text-xs outline-none text-foreground"
+          >
+            {routeOptions.map((r) => (
+              <option key={r} value={r}>{r === "all" ? "All routes" : r}</option>
+            ))}
+          </select>
+        </div>
 
-          <div className="rounded-[11px] border border-border bg-background px-3 h-9 flex items-center">
-            <select
-              value={selectedRoute}
-              onChange={(e) => setSelectedRoute(e.target.value)}
-              className="bg-transparent text-sm outline-none text-foreground"
-            >
-              {routeOptions.map((r) => (
-                <option key={r} value={r}>{r === "all" ? "All routes" : r}</option>
-              ))}
-            </select>
-          </div>
+        {(search || selectedRoute !== "all") && (
+          <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs text-muted-foreground" onClick={() => { setSearch(""); setSelectedRoute("all") }}>
+            <X className="size-3.5" />
+            Reset
+          </Button>
+        )}
 
-          {(search || selectedRoute !== "all") && (
-            <Button variant="ghost" size="sm" className="h-9 gap-1.5 text-muted-foreground" onClick={() => { setSearch(""); setSelectedRoute("all") }}>
-              <X className="size-3.5" />
-              Reset
-            </Button>
+        <div className="ml-auto flex items-center gap-2 shrink-0">
+          <span className="text-[11px] font-semibold text-muted-foreground tabular-nums">
+            {isLoading ? "Loading…" : `${filteredPoints.length} location${filteredPoints.length === 1 ? "" : "s"}`}
+          </span>
+          {!isLoading && totalPhotos > 0 && (
+            <span className="text-[11px] font-semibold text-muted-foreground tabular-nums">
+              · {totalPhotos} photo{totalPhotos === 1 ? "" : "s"}
+            </span>
           )}
         </div>
+      </div>
 
-        {/* Grid */}
+      {/* ── Content ─────────────────────────────────────────────────────── */}
+      <div className="flex-1 min-h-0 overflow-auto px-4 sm:px-5 lg:px-6 py-5">
         {isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {[...Array(4)].map((_, i) => (
@@ -313,5 +300,3 @@ export function SiteImages() {
     </div>
   )
 }
-  
-

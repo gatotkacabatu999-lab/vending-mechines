@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import { useRegisterRefresh } from "@/contexts/RefreshContext"
 import { Plus, Trash2, ChevronLeft, ChevronRight, Image as ImageIcon, Pencil, MoreVertical, ArrowUp, ArrowDown, Upload, Link, Save, Layers, Search, ChevronDown } from "lucide-react"
-import { Separator } from "@/components/ui/separator"
 import { LoadingSpinner, LoadingState } from "@/components/ui/loading"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -563,29 +562,55 @@ export function PlanoVM() {
   }
 
   return (
-    <div className="flex min-h-full bg-background">
-      <aside className="hidden xl:flex flex-col w-80 shrink-0 border-r border-border bg-muted/40 p-6 space-y-6">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">Pages</p>
-              <h2 className="text-xl font-semibold tracking-tight text-foreground">Plano VM</h2>
-            </div>
-            {isEditMode && (
-              <Button size="icon" variant="ghost" className="h-10 w-10 p-0" onClick={() => setAddPageDialog(true)}>
-                <Plus className="size-4" />
-              </Button>
-            )}
-          </div>
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60 pointer-events-none" />
+    <div className="flex flex-col flex-1 min-h-0">
+
+      {/* ── Page heading ──────────────────────────────────────────────────── */}
+      <div className="flex items-start justify-between gap-4 px-4 sm:px-5 lg:px-6 pt-5 sm:pt-6 pb-3 shrink-0">
+        <PageHeader
+          icon={<Layers className="size-3.5" />}
+          title="Plano VM"
+          description="Visual Merchandising Planogram Manager"
+        />
+        {isEditMode && hasUnsavedChanges && (
+          <button
+            type="button"
+            onClick={saveChanges}
+            disabled={isSaving}
+            className={[
+              "inline-flex items-center gap-2 shrink-0",
+              "px-5 py-2 text-xs font-bold uppercase tracking-widest",
+              "border-2 transition-all duration-200 active:scale-95 select-none",
+              isSaving
+                ? "border-emerald-500 bg-emerald-500/10 text-emerald-500 cursor-not-allowed"
+                : "border-foreground bg-foreground text-background hover:bg-transparent hover:text-foreground shadow-[3px_3px_0px_0px] shadow-foreground/30 hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]",
+            ].join(" ")}
+          >
+            {isSaving
+              ? <LoadingSpinner size={14} className="shrink-0" />
+              : <Save className="size-3.5 shrink-0" />}
+            {isSaving ? 'Saving...' : 'Save'}
+          </button>
+        )}
+      </div>
+
+      {/* ── Body (sidebar + main) ─────────────────────────────────────────── */}
+      <div className="flex flex-1 min-h-0 overflow-hidden border-t border-border">
+      <aside className="hidden xl:flex flex-col w-80 shrink-0 border-r border-border bg-muted/40 p-5 space-y-5 overflow-y-auto">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60 pointer-events-none" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search row or image..."
-              className="h-12 rounded-2xl pl-10 pr-3"
+              className="h-9 rounded-xl pl-9 pr-3 text-sm"
             />
           </div>
+          {isEditMode && (
+            <Button size="icon" variant="outline" className="h-9 w-9 shrink-0" onClick={() => setAddPageDialog(true)}>
+              <Plus className="size-3.5" />
+            </Button>
+          )}
         </div>
 
         <div className="space-y-3 overflow-y-auto pb-2">
@@ -665,43 +690,6 @@ export function PlanoVM() {
       </aside>
       <div className="flex-1 overflow-y-auto">
         <div className="px-6 py-6 xl:px-10">
-        {/* Title and Add Page Button */}
-        <div className="mb-8">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <PageHeader
-                icon={<Layers className="size-3.5" />}
-                title="Plano VM"
-                description="Visual Merchandising Planogram Manager"
-              />
-            </div>
-            {isEditMode && (
-              <div className="flex justify-end gap-2">
-                {hasUnsavedChanges && (
-                  <button
-                    type="button"
-                    onClick={saveChanges}
-                    disabled={isSaving}
-                    className={[
-                      "inline-flex items-center gap-2",
-                      "px-5 py-2 text-xs font-bold uppercase tracking-widest",
-                      "border-2 transition-all duration-200 active:scale-95 select-none",
-                      isSaving
-                        ? "border-emerald-500 bg-emerald-500/10 text-emerald-500 cursor-not-allowed"
-                        : "border-foreground bg-foreground text-background hover:bg-transparent hover:text-foreground shadow-[3px_3px_0px_0px] shadow-foreground/30 hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]",
-                    ].join(" ")}
-                  >
-                    {isSaving
-                      ? <LoadingSpinner size={14} className="shrink-0" />
-                      : <Save className="size-3.5 shrink-0" />}
-                    {isSaving ? 'Saving...' : 'Save'}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-          <Separator className="mt-4" />
-        </div>
 
         {/* Page Picker and Search */}
         <div className="mb-10">
@@ -1096,6 +1084,7 @@ export function PlanoVM() {
           </div>
         )}
         </div>
+      </div>
       </div>
 
       {/* Add Row Dialog */}

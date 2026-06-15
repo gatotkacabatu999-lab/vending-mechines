@@ -1997,7 +1997,7 @@ const trackablePages = ["route-list", "deliveries", "rooster", "plano-vm", "gall
         )}
         <Suspense fallback={null}>
           <div
-            className={`relative z-10 flex flex-col flex-1 min-h-0 ${(currentPage === "deliveries" || currentPage === "route-list") ? "overflow-hidden" : "overflow-y-auto"} ${isTransitioning ? "page-fade-out" : "page-fade-in"}`}
+            className={`relative z-10 flex flex-col flex-1 min-h-0 ${(currentPage === "deliveries" || currentPage === "route-list" || currentPage === "gallery-site-images" || currentPage === "plano-vm") ? "overflow-hidden" : "overflow-y-auto"} ${isTransitioning ? "page-fade-out" : "page-fade-in"}`}
           >
             {renderContent()}
           </div>
