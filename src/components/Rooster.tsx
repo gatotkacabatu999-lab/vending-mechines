@@ -560,6 +560,7 @@ export function Rooster({ viewMode: viewModeProp = "week" }: { viewMode?: ViewMo
     selectedResourceId?: string
   }>({ open: false })
   const [deleteConfirmDialog, setDeleteConfirmDialog] = useState(false)
+  const [deleteAllConfirmOpen, setDeleteAllConfirmOpen] = useState(false)
   const [deleteShiftConfirmOpen, setDeleteShiftConfirmOpen] = useState(false)
   const [deleteDateDialog, setDeleteDateDialog] = useState<{ open: boolean; dateFrom: string; dateTo: string; staffId: string }>({ open: false, dateFrom: "", dateTo: "", staffId: "" })
   const [deleteStaffConfirmDialog, setDeleteStaffConfirmDialog] = useState<{
@@ -1091,6 +1092,19 @@ export function Rooster({ viewMode: viewModeProp = "week" }: { viewMode?: ViewMo
     }
   }
 
+  const deleteAllShifts = async () => {
+    const all = shifts.map(s => s.id)
+    if (all.length === 0) { toast("No shifts to delete"); return }
+    const results = await Promise.all(all.map(id => apiDeleteShift(id)))
+    if (results.every(Boolean)) {
+      setShifts([])
+      clearSelection()
+      toast.success(`All ${all.length} shift${all.length > 1 ? 's' : ''} deleted`)
+    } else {
+      toast.error("Failed to delete some shifts")
+    }
+  }
+
   const deleteShiftsByDateRange = async (dateFrom: string, dateTo: string, staffId: string) => {
     const from = new Date(dateFrom)
     const to   = new Date(dateTo)
@@ -1254,16 +1268,27 @@ export function Rooster({ viewMode: viewModeProp = "week" }: { viewMode?: ViewMo
           </div>
 
           {isEditMode && selectedShifts.length === 0 && (
-            <button
-              onClick={() => {
-                const today = new Date().toISOString().split("T")[0]
-                setDeleteDateDialog({ open: true, dateFrom: today, dateTo: today, staffId: "" })
-              }}
-              className="flex items-center gap-1 h-8 px-2.5 rounded-lg border border-destructive/40 bg-destructive/5 hover:bg-destructive/10 text-destructive text-[11px] font-semibold transition-colors shrink-0"
-              title="Delete shifts by date"
-            >
-              <Trash2 className="size-3" />Delete
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-1 h-8 px-2.5 rounded-lg border border-destructive/40 bg-destructive/5 hover:bg-destructive/10 text-destructive text-[11px] font-semibold transition-colors shrink-0">
+                  <Trash2 className="size-3" />Delete<ChevronDown className="size-3 ml-0.5 opacity-60" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[9rem]">
+                <DropdownMenuItem onClick={() => {
+                  const today = new Date().toISOString().split("T")[0]
+                  setDeleteDateDialog({ open: true, dateFrom: today, dateTo: today, staffId: "" })
+                }}>
+                  <CalendarDays className="size-4 mr-2" />By Date
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setDeleteAllConfirmOpen(true)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="size-4 mr-2" />Delete All
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
 
           {isEditMode && selectedShifts.length > 0 && (
@@ -1742,9 +1767,9 @@ export function Rooster({ viewMode: viewModeProp = "week" }: { viewMode?: ViewMo
                     </select>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Start Date</label>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <label className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground shrink-0 w-16">Start</label>
                       <input
                         type="date"
                         value={shiftForm.date}
@@ -1758,11 +1783,11 @@ export function Rooster({ viewMode: viewModeProp = "week" }: { viewMode?: ViewMo
                             setShiftEndDate(nextStart)
                           }
                         }}
-                        className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark]"
+                        className="flex-1 h-8 min-w-0 rounded-lg border border-input bg-background px-2 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark]"
                       />
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">End Date</label>
+                    <div className="flex items-center gap-2">
+                      <label className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground shrink-0 w-16">End</label>
                       <input
                         type="date"
                         value={shiftEndDate}
@@ -1772,7 +1797,7 @@ export function Rooster({ viewMode: viewModeProp = "week" }: { viewMode?: ViewMo
                           setShiftEndDate(nextEnd)
                           setShiftDurationDays(String(getInclusiveDurationDays(shiftForm.date, nextEnd)))
                         }}
-                        className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark]"
+                        className="flex-1 h-8 min-w-0 rounded-lg border border-input bg-background px-2 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark]"
                       />
                     </div>
                   </div>
@@ -1971,9 +1996,9 @@ export function Rooster({ viewMode: viewModeProp = "week" }: { viewMode?: ViewMo
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">From</label>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <label className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground shrink-0 w-12">From</label>
                         <input
                           type="date"
                           value={genFrom}
@@ -1981,17 +2006,17 @@ export function Rooster({ viewMode: viewModeProp = "week" }: { viewMode?: ViewMo
                             setGenFrom(e.target.value)
                             setGenTo(addDaysToDateKey(e.target.value, 27))
                           }}
-                          className="h-8 rounded-lg border border-input bg-background px-2.5 text-[10px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark] w-full"
+                          className="flex-1 h-8 min-w-0 rounded-lg border border-input bg-background px-2 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark]"
                         />
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">To</label>
+                      <div className="flex items-center gap-2">
+                        <label className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground shrink-0 w-12">To</label>
                         <input
                           type="date"
                           value={genTo}
                           min={genFrom}
                           onChange={e => setGenTo(e.target.value)}
-                          className="h-8 rounded-lg border border-input bg-background px-2.5 text-[10px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark] w-full"
+                          className="flex-1 h-8 min-w-0 rounded-lg border border-input bg-background px-2 text-[11px] focus:outline-none focus:ring-2 focus:ring-ring [color-scheme:light] dark:[color-scheme:dark]"
                         />
                       </div>
                     </div>
@@ -2662,6 +2687,44 @@ export function Rooster({ viewMode: viewModeProp = "week" }: { viewMode?: ViewMo
               }}
             >
               <Trash2 className="size-3.5 mr-1.5" />Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Delete All Confirmation Dialog ────────────────────────────────────── */}
+      <Dialog open={deleteAllConfirmOpen} onOpenChange={setDeleteAllConfirmOpen}>
+        <DialogContent className="max-w-sm rounded-2xl p-0 overflow-hidden gap-0" onOpenAutoFocus={e => e.preventDefault()}>
+          <DialogHeader className="px-5 pt-5 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex shrink-0 items-center justify-center p-2 bg-red-500/10 rounded-lg text-red-500">
+                <Trash2 className="size-5" />
+              </div>
+              <DialogTitle className="text-base font-semibold tracking-tight">
+                Delete All Shifts
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+          <Separator />
+          <div className="px-5 py-4">
+            <p className="text-sm text-muted-foreground">
+              This will permanently delete <strong>all {shifts.length} shift{shifts.length !== 1 ? 's' : ''}</strong>. This action cannot be undone.
+            </p>
+          </div>
+          <Separator />
+          <div className="px-5 py-3 flex items-center justify-between gap-2">
+            <Button variant="outline" size="sm" onClick={() => setDeleteAllConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={async () => {
+                await deleteAllShifts()
+                setDeleteAllConfirmOpen(false)
+              }}
+            >
+              <Trash2 className="size-3.5 mr-1.5" />Delete All
             </Button>
           </div>
         </DialogContent>

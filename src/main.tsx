@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client"
 
 import "./index.css"
 import App from "./App"
+import { SharedRoutePage } from "./components/SharedRoutePage"
 import { registerServiceWorker } from "./lib/pwa"
 import { DEFAULT_APP_FONT, FONT_OPTIONS } from "./hooks/use-theme"
 
@@ -62,9 +63,14 @@ import { DEFAULT_APP_FONT, FONT_OPTIONS } from "./hooks/use-theme"
   } catch { /* localStorage may be unavailable */ }
 })()
 
+const _sharedRouteMatch = window.location.pathname.match(/\/routelistpage\/([A-Za-z0-9]+)\/?$/)
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    {_sharedRouteMatch
+      ? <SharedRoutePage code={_sharedRouteMatch[1]} />
+      : <App />
+    }
   </StrictMode>
 )
 
